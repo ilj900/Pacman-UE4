@@ -38,4 +38,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* Camera;
+
+	// Movement variables
+	FVector2D MovementInput;
+	FVector2D RotationInput;
+
+	// Control functions
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+	void PitchCamera(float Value);
+	void YawCamera(float Value);
 };
