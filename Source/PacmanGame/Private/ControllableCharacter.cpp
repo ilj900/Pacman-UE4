@@ -2,9 +2,11 @@
 
 
 #include "ControllableCharacter.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Engine/CollisionProfile.h"
 
 // Sets default values
 AControllableCharacter::AControllableCharacter()
@@ -12,16 +14,31 @@ AControllableCharacter::AControllableCharacter()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BallMesh(TEXT("StaticMesh'/Game/Meshes/Sphere.Sphere'"));
+
 	CollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Collision Mesh"));
-	SetRootComponent(CollisionMesh);
+	CollisionMesh->SetStaticMesh(BallMesh.Object);
+	CollisionMesh->BodyInstance.SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
+	CollisionMesh->SetSimulatePhysics(true);
+	CollisionMesh->SetAngularDamping(0.1f);
+	CollisionMesh->SetLinearDamping(0.1f);
+	CollisionMesh->BodyInstance.MassScale = 3.5;
+	CollisionMesh->BodyInstance.MaxAngularVelocity = 50.f;
+	CollisionMesh->SetNotifyRigidBodyCollision(true);
+	RootComponent = CollisionMesh;
+
+	Gimball = CreateDefaultSubobject<USceneComponent>(TEXT("Gimball"));
+	Gimball->SetupAttachment(RootComponent);
+	Gimball->SetUsingAbsoluteRotation(true);
 
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Spring Arm"));
-	CameraSpringArm->SetupAttachment(RootComponent);
+	CameraSpringArm->SetupAttachment(Gimball);
 	CameraSpringArm->TargetArmLength = 1000.f;
 	CameraSpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(CameraSpringArm, CameraSpringArm->SocketName);
+	Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
+	Camera->bUsePawnControlRotation = false;
 
 }
 
@@ -39,25 +56,14 @@ void AControllableCharacter::Tick(float DeltaTime)
 
 	{
 		FRotator NewRotation = GetActorRotation();
-		NewRotation.Yaw += RotationInput.X;
+		NewRotation.Yaw += CameraInput.X;
 		SetActorRotation(NewRotation);
 	}
 
 	{
 		FRotator NewRotation = CameraSpringArm->GetComponentRotation();
-		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + RotationInput.Y, -80.0f, -15.0f);
+		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + CameraInput.Y, -80.0f, -15.0f);
 		CameraSpringArm->SetWorldRotation(NewRotation);
-	}
-
-	{
-		if (!MovementInput.IsZero())
-		{
-			MovementInput = MovementInput.GetSafeNormal() * 1000.0f;
-			FVector NewLocation = GetActorLocation();
-			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime;
-			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
-			SetActorLocation(NewLocation);
-		}
 	}
 
 }
@@ -75,22 +81,26 @@ void AControllableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void AControllableCharacter::MoveForward(float Value)
 {
-	MovementInput.X = FMath::Clamp<float>(Value, -1.0f, 1.0f);
+	auto CameraRight = Camera->GetRightVector();
+	CameraRight.Z = 0.f;
+	CollisionMesh->AddTorqueInRadians(CameraRight.GetSafeNormal() * 50000000.0f * Value);
 }
 
 void AControllableCharacter::MoveRight(float Value)
 {
-	MovementInput.Y = FMath::Clamp<float>(Value, -1.0f, 1.0f);
+	auto CameraFront = Camera->GetForwardVector();
+	CameraFront.Z = 0.f;
+	CollisionMesh->AddTorqueInRadians(-CameraFront.GetSafeNormal() * 50000000.0f * Value);
 }
 
 void AControllableCharacter::PitchCamera(float Value)
 {
-	RotationInput.Y = Value;
+	CameraSpringArm->AddLocalRotation(FRotator(Value, 0.f, 0.f));
 }
 
 void AControllableCharacter::YawCamera(float Value)
 {
-	RotationInput.X = Value;
+	Gimball->AddLocalRotation(FRotator(0.f, Value, 0.f));
 }
 
 

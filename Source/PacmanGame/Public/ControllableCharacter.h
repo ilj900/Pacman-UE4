@@ -34,18 +34,21 @@ public:
 	UStaticMeshComponent* CollisionMesh;
 
 	UPROPERTY(VisibleAnywhere)
+	USceneComponent* Gimball;
+
+	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraSpringArm;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* Camera;
 
-	// Movement variables
-	FVector2D MovementInput;
-	FVector2D RotationInput;
+	FVector2D CameraInput;
 
 	// Control functions
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void PitchCamera(float Value);
 	void YawCamera(float Value);
+
+	float MaxVelocity = 10000.f;
 };
