@@ -20,7 +20,7 @@ AControllableCharacter::AControllableCharacter()
 	CollisionMesh->SetStaticMesh(BallMesh.Object);
 	CollisionMesh->BodyInstance.SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
 	CollisionMesh->SetSimulatePhysics(true);
-	CollisionMesh->SetAngularDamping(0.1f);
+	CollisionMesh->SetAngularDamping(20.0f);
 	CollisionMesh->SetLinearDamping(0.1f);
 	CollisionMesh->BodyInstance.MassScale = 3.5;
 	CollisionMesh->BodyInstance.MaxAngularVelocity = 50.f;
@@ -83,14 +83,16 @@ void AControllableCharacter::MoveForward(float Value)
 {
 	auto CameraRight = Camera->GetRightVector();
 	CameraRight.Z = 0.f;
-	CollisionMesh->AddTorqueInRadians(CameraRight.GetSafeNormal() * 50000000.0f * Value);
+	auto AngularVelocity = CollisionMesh->GetPhysicsAngularVelocityInDegrees();
+	UE_LOG(LogTemp, Warning, TEXT("%f"), AngularVelocity.SizeSquared());
+	CollisionMesh->AddTorqueInRadians(CameraRight.GetSafeNormal() * TorqueToAdd * Value);
 }
 
 void AControllableCharacter::MoveRight(float Value)
 {
 	auto CameraFront = Camera->GetForwardVector();
 	CameraFront.Z = 0.f;
-	CollisionMesh->AddTorqueInRadians(-CameraFront.GetSafeNormal() * 50000000.0f * Value);
+	CollisionMesh->AddTorqueInRadians(-CameraFront.GetSafeNormal() * TorqueToAdd * Value);
 }
 
 void AControllableCharacter::PitchCamera(float Value)

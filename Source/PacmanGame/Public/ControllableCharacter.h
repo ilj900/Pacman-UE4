@@ -44,6 +44,9 @@ public:
 
 	FVector2D CameraInput;
 
+	UPROPERTY(EditDefaultsOnly)
+	float TorqueToAdd = 50000000.f;
+
 	// Control functions
 	void MoveForward(float Value);
 	void MoveRight(float Value);
