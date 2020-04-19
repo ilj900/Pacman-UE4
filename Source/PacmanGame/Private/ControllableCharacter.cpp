@@ -25,6 +25,7 @@ AControllableCharacter::AControllableCharacter()
 	CollisionMesh->BodyInstance.MassScale = 3.5;
 	CollisionMesh->BodyInstance.MaxAngularVelocity = 50.f;
 	CollisionMesh->SetNotifyRigidBodyCollision(true);
+	CollisionMesh->SetRelativeScale3D(FVector(0.43));
 	RootComponent = CollisionMesh;
 
 	Gimball = CreateDefaultSubobject<USceneComponent>(TEXT("Gimball"));
@@ -84,7 +85,6 @@ void AControllableCharacter::MoveForward(float Value)
 	auto CameraRight = Camera->GetRightVector();
 	CameraRight.Z = 0.f;
 	auto AngularVelocity = CollisionMesh->GetPhysicsAngularVelocityInDegrees();
-	UE_LOG(LogTemp, Warning, TEXT("%f"), AngularVelocity.SizeSquared());
 	CollisionMesh->AddTorqueInRadians(CameraRight.GetSafeNormal() * TorqueToAdd * Value);
 }
 
