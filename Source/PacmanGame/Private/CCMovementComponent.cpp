@@ -31,3 +31,24 @@ void UCCMovementComponent::MoveRight(float Scale)
 		Mesh->AddTorqueInRadians(-CameraFront.GetSafeNormal() * TorqueToAdd * Scale);
 	}
 }
+
+void UCCMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)
+{
+	auto ForwardVector = Camera->GetForwardVector();
+	ForwardVector.Z = 0.f;
+	ForwardVector.Normalize();
+	auto AIForwardIntention = MoveVelocity.GetSafeNormal();
+
+	auto ForwardIntention = FVector::DotProduct(ForwardVector, AIForwardIntention);
+	auto RightIntention = FVector::CrossProduct(ForwardVector, AIForwardIntention).Z;
+
+	if (bForceMaxSpeed)
+	{
+		ForwardIntention *= MoveVelocity.Size();
+		RightIntention *= MoveVelocity.Size();
+	}
+
+
+	MoveForward(ForwardIntention);
+	MoveRight(RightIntention);
+}

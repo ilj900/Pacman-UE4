@@ -27,5 +27,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float TorqueToAdd = 300000.f;
+
+	virtual void RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed) override;
 	
 };
