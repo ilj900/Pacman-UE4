@@ -33,7 +33,9 @@ AControllableCharacter::AControllableCharacter()
 	Gimball->SetUsingAbsoluteRotation(true);
 
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Spring Arm"));
+
 	CameraSpringArm->SetupAttachment(Gimball);
+	CameraSpringArm->bDoCollisionTest = false;
 	CameraSpringArm->TargetArmLength = 1000.f;
 	CameraSpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 
