@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/CollisionProfile.h"
+#include "CCMovementComponent.h"
 
 // Sets default values
 AControllableCharacter::AControllableCharacter()
@@ -43,6 +44,8 @@ AControllableCharacter::AControllableCharacter()
 	Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false;
 
+	MovementComponent = CreateDefaultSubobject<UCCMovementComponent>(TEXT("Movement Component"));
+	MovementComponent->Initialize(CollisionMesh, Camera);
 }
 
 // Called when the game starts or when spawned
@@ -76,25 +79,17 @@ void AControllableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AControllableCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AControllableCharacter::MoveRight);
+	if (MovementComponent)
+	{
+		PlayerInputComponent->BindAxis("MoveForward", MovementComponent, &UCCMovementComponent::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", MovementComponent, &UCCMovementComponent::MoveRight);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed"));
+	}
 	PlayerInputComponent->BindAxis("CameraYaw", this, &AControllableCharacter::YawCamera);
 	PlayerInputComponent->BindAxis("CameraPitch", this, &AControllableCharacter::PitchCamera);
-}
-
-void AControllableCharacter::MoveForward(float Value)
-{
-	auto CameraRight = Camera->GetRightVector();
-	CameraRight.Z = 0.f;
-	auto AngularVelocity = CollisionMesh->GetPhysicsAngularVelocityInDegrees();
-	CollisionMesh->AddTorqueInRadians(CameraRight.GetSafeNormal() * TorqueToAdd * Value);
-}
-
-void AControllableCharacter::MoveRight(float Value)
-{
-	auto CameraFront = Camera->GetForwardVector();
-	CameraFront.Z = 0.f;
-	CollisionMesh->AddTorqueInRadians(-CameraFront.GetSafeNormal() * TorqueToAdd * Value);
 }
 
 void AControllableCharacter::PitchCamera(float Value)

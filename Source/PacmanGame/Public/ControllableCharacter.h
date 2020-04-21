@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UCCMovementComponent;
 
 UCLASS()
 class PACMANGAME_API AControllableCharacter : public APawn
@@ -42,10 +43,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* Camera;
 
-	FVector2D CameraInput;
+	UPROPERTY(VisibleAnywhere)
+	UCCMovementComponent* MovementComponent;
 
-	UPROPERTY(EditDefaultsOnly)
-	float TorqueToAdd = 300000.f;
+	FVector2D CameraInput;
 
 	// Control functions
 	void MoveForward(float Value);
