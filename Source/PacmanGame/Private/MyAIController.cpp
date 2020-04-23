@@ -4,22 +4,29 @@
 #include "MyAIController.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
+#include "NavigationData.h"
 
 void AMyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bIsActive)
+		return;
+
+	Super::Tick(DeltaTime);
+
 	auto Player = GetWorld()->GetFirstPlayerController()->GetPawn();
-	
+
 	if (Player)
 	{
-		LocationOfInterest = Player->GetActorLocation();
+		auto PlayerLocation = Player->GetActorLocation();
+		FHitResult HitResult;
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, GetPawn()->GetActorLocation(), PlayerLocation, ECollisionChannel::ECC_Visibility))
+		{
+			if (HitResult.GetActor()->GetFName() == Player->GetFName())
+			{
+				MoveToLocation(PlayerLocation, AcceptanceRadius);
+			}
+		}
 	}
-	else
-	{
-		//TODO generate location to reach
-	}
-
-
-	MoveToLocation(LocationOfInterest, AcceptanceRadius);
 }

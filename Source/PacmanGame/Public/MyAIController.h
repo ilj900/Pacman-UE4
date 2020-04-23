@@ -18,7 +18,7 @@ public:
 
 	void Tick(float DeltaTime);
 
-	FVector LocationOfInterest;
+	bool bIsActive = true;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
