@@ -16,7 +16,11 @@ APickUp::APickUp()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BallMesh(TEXT("StaticMesh'/Game/Meshes/Sphere.Sphere'"));
 
 	CollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Collision Mesh"));
+	if (BallMesh.Succeeded())
+		CollisionMesh->SetStaticMesh(BallMesh.Object);
 	CollisionMesh->OnComponentBeginOverlap.AddDynamic(this, &APickUp::OnOverlapBegin);
+	CollisionMesh->SetSimulatePhysics(false);
+	CollisionMesh->SetCollisionProfileName(TEXT("OverlapAll"));
 	RootComponent = CollisionMesh;
 
 }
@@ -37,6 +41,14 @@ void APickUp::Tick(float DeltaTime)
 
 void APickUp::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SetLifeSpan(0.1f);
+	auto Overlapper = Cast<AControllableCharacter>(OtherActor);
+	if (Overlapper)
+	{
+		if (Overlapper->IsPlayerControlled())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Me, Overlap!"));
+			SetLifeSpan(0.1f);
+		}
+	}
 }
 

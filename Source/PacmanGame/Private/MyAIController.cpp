@@ -35,7 +35,6 @@ void AMyAIController::Tick(float DeltaTime)
 		{
 			if (HitResult.GetActor()->GetFName() == Player->GetFName())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Gimme some HUGS!"));
 				MoveToLocation(PlayerLocation, AcceptanceRadius);
 			}
 		}
@@ -49,7 +48,6 @@ void AMyAIController::Tick(float DeltaTime)
 			FNavLocation Result;
 			if (NavSys->GetRandomReachablePointInRadius(LocalPawn->GetActorLocation(), 2100.f, Result))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Searching begins"));
 				MoveToLocation(Result.Location, AcceptanceRadius);
 			}
 		}
