@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "ControllableCharacter.h"
+#include "PacmanGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APickUp::APickUp()
@@ -46,7 +48,15 @@ void APickUp::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 	{
 		if (Overlapper->IsPlayerControlled())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Me, Overlap!"));
+			auto GameMode = UGameplayStatics::GetGameMode(GetWorld());
+			if (GameMode)
+			{
+				auto PacmanGameMod = Cast<APacmanGameMode>(GameMode);
+				if (PacmanGameMod)
+				{
+					PacmanGameMod->ReducePickups();
+				}
+			}
 			SetLifeSpan(0.1f);
 		}
 	}
